@@ -1,0 +1,75 @@
+name: Build Debian Package
+
+on:
+  push:
+    branches: [ main, master ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          cmake \
+          pkg-config \
+          libgtk-4-dev \
+          libglib2.0-dev \
+          libgtksourceview-5-dev \
+          dpkg-dev \
+          debhelper
+        
+    - name: Build project
+      run: |
+        rm -rf build
+        mkdir build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Release
+        make -j$(nproc)
+        
+    - name: Prepare package directory
+      run: |
+        mkdir -p package/usr/bin
+        cp build/nginxui package/usr/bin/
+        
+    - name: Build Debian package
+      run: |
+        dpkg-deb --build "package" "nginxui.deb"
+        
+    - name: Get version from control file
+      id: get_version
+      run: |
+        VERSION=$(grep "^Version:" package/DEBIAN/control | cut -d' ' -f2)
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        
+    - name: Rename package with version
+      run: |
+        VERSION=$(grep "^Version:" package/DEBIAN/control | cut -d' ' -f2)
+        ARCH=$(grep "^Architecture:" package/DEBIAN/control | cut -d' ' -f2)
+        mv nginxui.deb "nginxui-${VERSION}-${ARCH}.deb"
+        
+    - name: Upload Debian package artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: nginxui-deb-package
+        path: nginxui-*.deb
+        retention-days: 30
+        
+    - name: Create Release (on tag)
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: nginxui-*.deb
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
