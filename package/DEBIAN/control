@@ -1,0 +1,20 @@
+Package: nginxui
+Version: 1.0.0
+Section: utils
+Priority: optional
+Architecture: amd64
+Depends: libgtk-4-1,
+         libglib2.0-0,
+         nginx
+Recommends: libgtksourceview-5-0 | libgtksourceview-4-0
+Description: Nginx Configuration Editor GUI
+ A graphical user interface for managing Nginx configuration files.
+ Features include:
+  - Create, edit, and delete Nginx configuration files
+  - Syntax highlighting for Nginx config files (requires libgtksourceview)
+  - Test and reload Nginx configuration
+  - Automatic domain management in /etc/hosts
+ .
+ Note: Syntax highlighting is optional and requires libgtksourceview
+ to be installed. The application works without it but with basic
+ text editing only.

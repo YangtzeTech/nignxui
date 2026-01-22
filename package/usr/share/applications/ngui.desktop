@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=nginxui
+Comment=Manage Nginx configurations
+Exec=/usr/bin/nginxui
+Icon=/usr/share/icons/hicolor/256x256/apps/nginx.png
+Terminal=false
+Type=Application
+Categories=Utility;
