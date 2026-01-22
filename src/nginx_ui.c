@@ -120,7 +120,9 @@ void refresh_file_list(AppData *app_data) {
 }
 
 void apply_syntax_highlighting(GtkTextBuffer *buffer) {
-#ifndef HAVE_GTKSOURCEVIEW
+#ifdef HAVE_GTKSOURCEVIEW
+    (void)buffer; // Unused when GtkSourceView handles highlighting
+#else
     // Nginx keywords and directives
     const gchar *keywords[] = {
         "server", "listen", "server_name", "location", "root", "index", 
@@ -415,7 +417,7 @@ void setup_ui(GtkApplication *app, AppData *app_data) {
     gtk_source_view_set_auto_indent(GTK_SOURCE_VIEW(app_data->editor), TRUE);
     gtk_source_view_set_tab_width(GTK_SOURCE_VIEW(app_data->editor), 4);
     gtk_source_view_set_insert_spaces_instead_of_tabs(GTK_SOURCE_VIEW(app_data->editor), TRUE);
-    gtk_source_view_set_highlight_syntax(GTK_SOURCE_VIEW(app_data->editor), TRUE);
+    gtk_source_buffer_set_highlight_syntax(GTK_SOURCE_BUFFER(app_data->source_buffer), TRUE);
     
     // Enable word wrap
     gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(app_data->editor), GTK_WRAP_WORD);
@@ -499,8 +501,8 @@ void setup_ui(GtkApplication *app, AppData *app_data) {
     gtk_widget_add_css_class(app_data->logs_text, "log-text");
     // Create a CSS provider for log text styling
     GtkCssProvider *css_provider = gtk_css_provider_new();
-    gtk_css_provider_load_from_data(css_provider,
-        "textview.log-text { font-family: monospace; font-size: 10pt; }", -1);
+    gtk_css_provider_load_from_string(css_provider,
+        "textview.log-text { font-family: monospace; font-size: 10pt; }");
     gtk_style_context_add_provider_for_display(
         gtk_widget_get_display(app_data->logs_text),
         GTK_STYLE_PROVIDER(css_provider),
