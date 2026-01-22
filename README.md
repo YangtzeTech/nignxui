@@ -18,19 +18,19 @@ A graphical user interface for managing Nginx configuration files.
 - GtkSourceView (optional, for syntax highlighting)
 - pkg-config
 
-### Build Instructions
+### Build Debian Package
+
+manual
 
 ```bash
 mkdir build
 cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=/usr
-make
-sudo make install
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make -j$(nproc)
+dpkg-deb --build "package" "nginxui.deb"
 ```
 
-## Building Debian Package
-
-Use the Makefile:
+Or use the Makefile:
 
 ```bash
 make deb
